@@ -3,7 +3,8 @@
 #main dataset 'https://covid.ourworldindata.org/data/owid-covid-data.csv'
 #dataset with lockdowns 'https://raw.githubusercontent.com/OxCGRT/covid-policy-tracker/master/data/OxCGRT_latest.csv'
 
-#Before run the program in console must type this command 'chmod +x main.py'
+#Before run the program in console you must enter this command 'chmod +x main.py'
+#This command give permission to execute .sh files
 
 import subprocess
 import pandas as pd 
@@ -91,6 +92,7 @@ class Data:
 class DataBase:
     
     def __init__(self, hostname, username, password, dbname='covid_19'):
+        #Enter your personal hostname, username, password from mysql db
         self.hostname = hostname
         self.username = username
         self.password = password
@@ -197,8 +199,11 @@ class Chart:
 
 class Mail:
     
-    def __init__(self, sender='aruy.savchuk.work@gmail.com',
-                 receiver='aruy11@ukr.net',password='30l04ivyurahsr'):
+    def __init__(self, sender='youremailadress',
+                 receiver='receiveremaladress',password='yourpassword'):
+        #Enter in class construtor your personal/work email, 
+        #receiver's email and your password from email
+        
         self.sender = sender
         self.receiver = receiver
         self.password = password
@@ -266,36 +271,6 @@ if __name__ == '__main__':
     mail.send_mail(message, graph)
 
 
-            
-'''            
-sender = 'aruy.savchuk.work@gmail.com'
-receiver = 'aruy11@ukr.net'
-password='30l04ivyurahsr'
-
-server = smtplib.SMTP('smtp.gmail.com', 587)
-server.starttls()
-
-    
-server.login(sender, password)
-        # Craft message (obj)
-msg = MIMEMultipart()
-
-message = 'what \nSend from Hostname: flsjfdl'
-msg['Subject'] = 'It is only checj'
-msg['From'] = sender
-msg['To'] = receiver
-        # Insert the text to the msg going by e-mail
-msg.attach(MIMEText(message, "plain"))
-        # Attach the pdf to the msg going by e-mail
-with open("/home/yu_savchuk/petProject/covidChart.pdf", "rb") as f:
-            #attach = email.mime.application.MIMEApplication(f.read(),_subtype="pdf")
-    attach = MIMEApplication(f.read(),_subtype="pdf")
-attach.add_header('Content-Disposition','attachment',
-                  filename="/home/yu_savchuk/petProject/covidChart.pdf")
-msg.attach(attach)
-        # send msg
-server.send_message(msg)
-'''
 
 
 
