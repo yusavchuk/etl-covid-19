@@ -1,10 +1,10 @@
 #!/usr/bin/bash python
 
-#main dataset 'https://covid.ourworldindata.org/data/owid-covid-data.csv'
-#dataset with lockdowns 'https://raw.githubusercontent.com/OxCGRT/covid-policy-tracker/master/data/OxCGRT_latest.csv'
+# main dataset 'https://covid.ourworldindata.org/data/owid-covid-data.csv'
+# dataset with lockdowns 'https://raw.githubusercontent.com/OxCGRT/covid-policy-tracker/master/data/OxCGRT_latest.csv'
 
-#Before run the program in console you must enter this command 'chmod +x main.py'
-#This command give permission to execute .sh files
+# Before run the program in console you must enter this command 'chmod +x main.py'
+# This command give permission to execute .sh files
 
 import subprocess
 import pandas as pd 
@@ -19,18 +19,19 @@ from email.mime.application import MIMEApplication
 
 
 class Data:
-    """Some coments"""
-    
+    """This class is used to hold Data objects for creating
+    resulted table"""
     def __init__(self, mainfilename, extrafilename):
         self.mainfilename = mainfilename
         self.extrafilename = extrafilename
         
     def pull_files(self):
+        '''Execure shell command which pull two datafiles'''
         subprocess.call(['sh', './pull_main_data.sh', self.mainfilename,
                          self.extrafilename])
 
     def create_df_main(self):
-        
+        '''Create df with main information'''
         file_cols = ['location', 'date', 'total_cases', 'new_cases', 'total_deaths',
                       'new_deaths', 'hosp_patients', 'total_tests', 'new_tests',
                       'people_vaccinated', 'people_fully_vaccinated', 'new_vaccinations',
@@ -52,7 +53,8 @@ class Data:
         return df_main
     
     def create_df_lockdown(self):
-        
+        '''Create extra df with informationd of lockdowns 
+        and social restrictions'''
         lockdown_columns = ['CountryName', 'RegionName','Date', 'C1_School closing',
                             'C2_Workplace closing', 'C3_Cancel public events',
                             'C4_Restrictions on gatherings', 'C5_Close public transport',
@@ -75,7 +77,7 @@ class Data:
         return df_lockdown 
     
     def create_final_table(self):
-        
+        '''Create final table for future statistics'''
         df_main = self.create_df_main()
         df_lockdown = self.create_df_lockdown()
         
@@ -90,7 +92,8 @@ class Data:
 
 
 class DataBase:
-    
+    '''This class used for creating db, connection to db, inserting tables
+    from final df'''
     def __init__(self, hostname, username, password, dbname='covid_19'):
         #Enter your personal hostname, username, password from mysql db
         self.hostname = hostname
@@ -100,7 +103,7 @@ class DataBase:
         
     
     def _connect_db(self):
-        
+        '''Connect to existing db'''
         try:
             con_my = mysql.connector.connect(
                 host=self.hostname,
@@ -116,7 +119,7 @@ class DataBase:
             
             
     def create_db(self):
-        
+        '''Create db'''
         try:
             con_my = mysql.connector.connect(
                 host=self.hostname,
@@ -139,6 +142,7 @@ class DataBase:
             con_my.close()
 
     def create_table(self):
+        '''Create table in existing db'''
         cursor, con_my = self._connect_db()
         
         cursor.execute("CREATE TABLE covid_by_country(CountryName varchar(30),\
@@ -155,6 +159,7 @@ class DataBase:
         con_my.close()
         
     def fill_table(self, df):
+        '''Inserting rows to table'''
         cursor, con_my = self._connect_db()
     
         insert_query = f"""INSERT INTO {self.dbname}.covid_by_country VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,\
@@ -169,14 +174,16 @@ class DataBase:
         
 
 class Chart:
-    
+    '''This class hold objets for charts'''
     def __init__(self, df, filename, ntop_countries=10):
         self.df = df
         self.filename = filename
         self.ntop_countries = ntop_countries
     
     def get_statistic(self):
-        
+        '''Create df with statistic for the self.ntop_countries countries with
+        the highest mortality per capita
+        '''
         df = self.df.groupby('CountryName').max()[['total_deaths', 'population']]
         df['%_deaths_by_population'] = df['total_deaths'] / df['population'] * 100
         df.drop(['total_deaths', 'population'], axis=1, inplace=True)
@@ -186,11 +193,11 @@ class Chart:
         return df
         
     def save_pdf(self):
-        
+        '''Load df to .pfd file'''
         plt.savefig(self.filename +'.pdf')
     
     def create_chart(self):
-        
+        '''Create chart'''
         df_draw = self.get_statistic()
         df_draw['%_deaths_by_population'].plot(kind = 'barh')
         plt.xlabel('%_deaths_by_population')
@@ -198,7 +205,7 @@ class Chart:
          
 
 class Mail:
-    
+    '''This class is used to send email'''
     def __init__(self, sender='youremailadress',
                  receiver='receiveremaladress',password='yourpassword'):
         #Enter in class construtor your personal/work email, 
@@ -209,7 +216,7 @@ class Mail:
         self.password = password
         
     def send_mail(self, message, chart):
-        
+        '''Senf by email your created .pdf file with message'''
         try:
           
             server = smtplib.SMTP('smtp.gmail.com', 587)
