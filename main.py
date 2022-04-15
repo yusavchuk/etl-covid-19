@@ -92,7 +92,7 @@ class Data:
 
 
 class DataBase:
-    '''This class used for creating db, connection to db, inserting tables
+    '''This class is used for creating db, connection to db, inserting tables
     from final df'''
     def __init__(self, hostname, username, password, dbname='covid_19'):
         #Enter your personal hostname, username, password from mysql db
